@@ -4,3 +4,5 @@
 *.pyc/
 .idea/
 **/__pycache__/
+**/debug/
+main2.py
