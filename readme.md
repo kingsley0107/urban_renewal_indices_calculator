@@ -1,15 +1,32 @@
 中文版         
 
-# 城市更新指标计算器(03.25更新 施工状态)
+# 城市更新指标计算器(v0.1.0) 
 
 ### 主要功能
 
-- 地块指标计算 （离散地块 eg.城市内部地块等AOI数据）
-- 高德POI类型筛选 (eg. 菜市场, 超市, 快递站点...)
+- 以地块为单位的各类城市更新指标计算(覆盖率、密度、容积等)
+- 高德POI部分类型正则筛选参考 (eg. 菜市场, 超市, 快递站点...)
+
+### 数据样例
+
+- ![城市地块](./img/blocks.jpg )
+- ![建筑](./img/bd.jpg)
+- ![POI](./img/poi.jpg)
+- ![计算结果](./img/attributes.jpg)
+
 
 ### 模块介绍
 #### 1. Calculator.PointIndex
- -  地块内POI Buffer覆盖率(如菜市场Poi buffer300m后，对所有地块进行菜市场覆盖率计算)
+ -  以地块为单位的POI 覆盖率(1.菜市场Poi buffer300m，计算地块菜市场覆盖率)
+    -   算法原理图示：
+        -   ![data](./img/PoiIndex/ori.jpg)
+            <center>原始POI及地块数据</center>
+        -   ![step1](./img/PoiIndex/step1.jpg) 
+            <center>根据POI生成缓冲区(重叠部分合并)</center>
+        -   ![step2](./img/PoiIndex/step2.jpg) 
+            <center>提取缓冲区与地块相交部分</center>
+        -   ![step2](./img/PoiIndex/output.jpg) 
+            <center>分别对地块进行缓冲区面积/地块总面积，计算得到结果</center>
  -  地块内POI(buffer)数量 (如菜市场buffer 300m后，对所有地块计算含有菜市场缓冲区的数量
  (当不需要缓冲区时设置buffer为0.0001即可))
 
@@ -17,12 +34,7 @@
  - AOI 占地面积 (如地块面积)
  - 地块内AOI Buffer覆盖率
 
-### 数据样例
 
-- ![城市地块](./img/blocks.jpg )
-- ![计算结果](./img/attributes.jpg)
-- ![建筑](./img/bd.jpg)
-- ![POI](./img/poi.jpg)
 
 ### 涵盖指标 (持续施工中)
 

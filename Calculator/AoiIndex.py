@@ -118,6 +118,6 @@ def building_floor_area_cal(bd: gpd.GeoDataFrame, block: gpd.GeoDataFrame, bd_ty
                    left_on='join_id', right_index=True)
     res[bd_type+'_floor_area'] = res[bd_type +
                                      '_floor_area'].fillna(0).astype(float).round(2)
-    res = res.to_crs(ori_crs)[cols + bd_type +
-                              '_floor_area']
+    res = res.to_crs(ori_crs)[cols +
+                              [f'{bd_type}_floor_area']]
     return res
