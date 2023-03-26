@@ -30,7 +30,7 @@
  -  地块内POI(buffer)数量 (如菜市场buffer 300m后，对所有地块计算含有菜市场缓冲区的数量
  (当不需要缓冲区时设置buffer为0.0001即可))
     -   算法原理图示：
-            -   ![data](./img/PoiIndex/ori.jpg)
+            -   ![data2](./img/PoiIndex/cov/ori.jpg)
                 <center>原始POI及地块数据</center>
             -   ![step1](./img/PoiIndex/count/step1.jpg) 
                 <center>根据POI生成缓冲区(重叠部分不再合并)</center>
@@ -40,10 +40,29 @@
                 <center>计算与地块相交的缓冲区数量，得到输出结果</center>
 
 
- #### 2. Calculator.AoiIndex
- - AOI 占地面积 (如地块面积)
- - 地块内AOI Buffer覆盖率
+#### 2. Calculator.LineIndex
+ -  以地块为单位的路网密度计算
+    -   算法原理图示：
+        -   ![data](./img/LineIndex/ori.jpg)
+            <center>原始路网及地块数据</center>
+        -   ![step1](./img/LineIndex/step1.jpg) 
+            <center>提取与地块重叠的路网部分</center>
+        -   ![step2](./img/LineIndex/output.jpg) 
+            <center>计算(路网长度总和(km)/地块面积(km²))</center>
 
+#### 3. Calculator.AoiIndex
+ -  以地块为单位的面数据指标计算
+ -  覆盖率类参考POI
+ -  building_floor_area地块建筑面积计算：
+    -   算法原理图示：
+        -   ![data](./img/AoiIndex/ori1.jpg)
+            <center>原始建筑数据及地块数据</center>
+        -   ![req](./img/AoiIndex/requirement.png)
+            <center>建筑数据要求有一个代表高度的字段</center>
+        -   ![step1](./img/AoiIndex/step1.jpg) 
+            <center>提取与地块重叠的建筑部分(红色部分)</center>
+        -   ![step2](./img/AoiIndex/output.jpg) 
+            <center>通过高度推算层数，再使用建筑占地面积*层数得到建筑面积</center>
 
 
 ### 涵盖指标 (持续施工中)

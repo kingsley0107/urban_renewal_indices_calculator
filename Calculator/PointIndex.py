@@ -23,7 +23,7 @@ def poi_coverage_cal(pois: gpd.GeoDataFrame, block: gpd.GeoDataFrame, poi_type: 
 
 
     Returns:
-        gpd.GeoDataFrame: blocks新增一列poi_type_coverage
+       gdf
     """
     # restore origin crs for final result
     block_ori_crs = block.crs
@@ -67,20 +67,18 @@ def poi_coverage_cal(pois: gpd.GeoDataFrame, block: gpd.GeoDataFrame, poi_type: 
     return result
 
 
-def count_poi_with_buffer(pois: gpd.GeoDataFrame, block: gpd.GeoDataFrame,  threshold: int = 300, poi_type: str = 'new_type') -> gpd.GeoDataFrame:
+def count_poi_with_buffer(pois: gpd.GeoDataFrame, block: gpd.GeoDataFrame,  threshold: int = 300, poi_type: str = '') -> gpd.GeoDataFrame:
     """计算block内的poi数量(buffer版poi)
 
     Args:
         pois (gpd.GeoDataFrame): Points of interest data.
         block (gpd.GeoDataFrame): Block data.
+        threshold (int, optional): Buffer distance around POI in meters. Defaults to 300.
         poi_type (str, optional): Type of POI. Defaults to ''.
-        buffer_distance (int, optional): Buffer distance around POI in meters. Defaults to 300.
 
-    Raises:
-        Exception: _description_
 
     Returns:
-        gpd.GeoDataFrame: blocks新增一列
+        gdf
     """
     ori_crs = block.crs
     block_cols = block.columns.to_list()

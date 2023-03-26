@@ -10,10 +10,10 @@ def road_dens_cal(raw_road: gpd.GeoDataFrame, block: gpd.GeoDataFrame) -> gpd.Ge
 
     Args:
         raw_road (gpd.GeoDataFrame): 路网gdf
-        block (gpd.GeoDataFrame): _description_
+        block (gpd.GeoDataFrame): 地块gdf
 
     Returns:
-        gpd.GeoDataFrame: 新增一列
+        gdf
     """
     ori_crs = block.crs
     cols = block.columns.to_list()
