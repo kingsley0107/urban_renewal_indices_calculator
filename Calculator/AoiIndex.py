@@ -9,10 +9,10 @@ def aoi_area_cal(aois: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """Calculate the area of blocks
 
     Args:
-        path_block (str): 路径
+        aois (gpd.GeoDataFrame): gdf
 
     Returns:
-        gpd.GeoDataFrame: blocks with 'block_area'
+        gdf with a new field 'aoi_area'
     """
     ori_crs = aois.crs
     to_mercator(aois)
@@ -29,14 +29,11 @@ def aoi_coverage_cal(aois: gpd.GeoDataFrame, block: gpd.GeoDataFrame, aoi_type: 
     Args:
         aois (gpd.GeoDataFrame): 传入geodataframe
         block (gpd.GeoDataFrame): 传入geodataframe
-        aoi_type (str): AOI类别,具体类型对应AOI_BUFFER_MAP与FILTER_MAP
-        threshold (int, optional): _description_. Defaults to 500.
-
-    Raises:
-        Exception: AOI类别错误
+        aoi_type (str): AOI类型 用于新增字段命名 如 "{green_space}_coverage_rate"
+        threshold (int, optional): buffer distance. Defaults to 500.
 
     Returns:
-        gpd.GeoDataFrame: blocks新增一列aoi_type_coverage
+        gpd.GeoDataFrame: block with new field 
     """
     ori_crs = block.crs
     cols = block.columns.to_list()
@@ -64,13 +61,11 @@ def building_roof_area_cal(bd: gpd.GeoDataFrame, block: gpd.GeoDataFrame, bd_typ
     Args:
         aois (gpd.GeoDataFrame): 建筑gdf
         block (gpd.GeoDataFrame): _description_
-        aoi_type (str): 建筑_type，参照FILTERMAP内的类型
+        aoi_type (str): 建筑_type,用于新增字段命名 如 "{building}_roof_area"
 
-    Raises:
-        Exception: _description_
 
     Returns:
-        gpd.GeoDataFrame: blocks新增一列
+        gpd.GeoDataFrame: block with new field
     """
     ori_crs = block.crs
     to_mercator(bd)
@@ -94,14 +89,11 @@ def building_floor_area_cal(bd: gpd.GeoDataFrame, block: gpd.GeoDataFrame, bd_ty
 
     Args:
         aois (gpd.GeoDataFrame): 建筑gdf
-        block (gpd.GeoDataFrame): _description_
-        aoi_type (str): 建筑_type，参照FILTERMAP内的类型
-
-    Raises:
-        Exception: _description_
+        block (gpd.GeoDataFrame): 地块gdf
+        aoi_type (str): 建筑_type, 用于新增字段命名 如 "{building}_floor_area"
 
     Returns:
-        gpd.GeoDataFrame: blocks新增一列
+        gpd.GeoDataFrame: block with a new field
     """
     ori_crs = block.crs
     to_mercator(bd)
