@@ -19,16 +19,26 @@
 #### 1. Calculator.PointIndex
  -  以地块为单位的POI 覆盖率(1.菜市场Poi buffer300m，计算地块菜市场覆盖率)
     -   算法原理图示：
-        -   ![data](./img/PoiIndex/ori.jpg)
+        -   ![data](./img/PoiIndex/cov/ori.jpg)
             <center>原始POI及地块数据</center>
-        -   ![step1](./img/PoiIndex/step1.jpg) 
+        -   ![step1](./img/PoiIndex/cov/step1.jpg) 
             <center>根据POI生成缓冲区(重叠部分合并)</center>
-        -   ![step2](./img/PoiIndex/step2.jpg) 
+        -   ![step2](./img/PoiIndex/cov/step2.jpg) 
             <center>提取缓冲区与地块相交部分</center>
-        -   ![step2](./img/PoiIndex/output.jpg) 
+        -   ![step2](./img/PoiIndex/cov/output.jpg) 
             <center>分别对地块进行缓冲区面积/地块总面积，计算得到结果</center>
  -  地块内POI(buffer)数量 (如菜市场buffer 300m后，对所有地块计算含有菜市场缓冲区的数量
  (当不需要缓冲区时设置buffer为0.0001即可))
+    -   算法原理图示：
+            -   ![data](./img/PoiIndex/ori.jpg)
+                <center>原始POI及地块数据</center>
+            -   ![step1](./img/PoiIndex/count/step1.jpg) 
+                <center>根据POI生成缓冲区(重叠部分不再合并)</center>
+            -   ![step2](./img/PoiIndex/count/step2.jpg) 
+                <center>提取缓冲区与地块相交部分(当一个地块被多个缓冲区覆盖时会出现有大量缓冲区重叠的区域)</center>
+            -   ![step2](./img/PoiIndex/count/output.jpg) 
+                <center>计算与地块相交的缓冲区数量，得到输出结果</center>
+
 
  #### 2. Calculator.AoiIndex
  - AOI 占地面积 (如地块面积)
