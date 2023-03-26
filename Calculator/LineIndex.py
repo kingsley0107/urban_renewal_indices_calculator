@@ -5,7 +5,7 @@ from utils.to_mercator import to_mercator
 from config.static_vars import *
 
 
-def road_dens(raw_road: gpd.GeoDataFrame, block: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+def road_dens_cal(raw_road: gpd.GeoDataFrame, block: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """路网密度计算
 
     Args:

@@ -5,7 +5,7 @@ from utils.to_mercator import to_mercator
 from config.static_vars import *
 
 
-def aoi_area(path_block: str) -> gpd.GeoDataFrame:
+def aoi_area_cal(aois: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """Calculate the area of blocks
 
     Args:
@@ -14,15 +14,17 @@ def aoi_area(path_block: str) -> gpd.GeoDataFrame:
     Returns:
         gpd.GeoDataFrame: blocks with 'block_area'
     """
+    ori_crs = aois.crs
+    to_mercator(aois)
+    aois['aoi_area'] = aois.area
+    aois = aois.to_crs(ori_crs)
+    return aois
 
-    raw_blocks = gpd.read_file(path_block)[['id', 'object_id', 'geometry']]
-    to_mercator(raw_blocks)
-    raw_blocks['block_area'] = raw_blocks.area
-    return raw_blocks
+# create buffer with geopandas
 
 
-def aoi_coverage(aois: gpd.GeoDataFrame, block: gpd.GeoDataFrame, aoi_type: str, threshold: int = 500) -> gpd.GeoDataFrame:
-    """AOI覆盖率计算，根据传入的AOI与threshold距离进行buffer
+def aoi_coverage_cal(aois: gpd.GeoDataFrame, block: gpd.GeoDataFrame, aoi_type: str, threshold: int = 500) -> gpd.GeoDataFrame:
+    """AOI覆盖率计算,根据传入的AOI与threshold距离进行buffer
 
     Args:
         aois (gpd.GeoDataFrame): 传入geodataframe
@@ -36,22 +38,27 @@ def aoi_coverage(aois: gpd.GeoDataFrame, block: gpd.GeoDataFrame, aoi_type: str,
     Returns:
         gpd.GeoDataFrame: blocks新增一列aoi_type_coverage
     """
-    try:
-        target_aoi = eval(FILTER_MAP[aoi_type])
-    except KeyError:
-        raise Exception(' INVALID AOI TYPE ')
-    buffer = gpd.GeoDataFrame(target_aoi.buffer(
+    ori_crs = block.crs
+    cols = block.columns.to_list()
+    to_mercator(aois)
+    to_mercator(block)
+    block['join_id'] = block.index
+    block['block_area'] = block.area
+    buffer = gpd.GeoDataFrame(aois.buffer(
         threshold), columns=['geometry']).dissolve()
-    overlap = gpd.overlay(block, buffer, how='intersection')
-    overlap[aoi_type+'覆盖率'] = round(overlap.area /
-                                    overlap['block_area'], 4)*100
+    overlap = gpd.overlay(block, buffer, how='intersection')[
+        ['join_id', 'geometry', 'block_area']]
+    overlap[aoi_type+'_coverage_rate'] = round(overlap.area /
+                                               overlap['block_area'], 4)*100
     result = pd.merge(block, overlap.drop(['block_area', 'geometry'], axis=1), on=[
-                      'id', 'object_id'], how='outer')
-    result[aoi_type+'覆盖率'] = result[aoi_type+'覆盖率'].fillna(0)
+                      'join_id'], how='outer')
+    result[aoi_type+'_coverage_rate'] = result[aoi_type +
+                                               '_coverage_rate'].fillna(0)
+    result = result.to_crs(ori_crs)[cols+[f'{aoi_type}_coverage_rate']]
     return result
 
 
-def aoi_roof_area(aois: gpd.GeoDataFrame, block: gpd.GeoDataFrame, aoi_type: str) -> gpd.GeoDataFrame:
+def building_roof_area_cal(bd: gpd.GeoDataFrame, block: gpd.GeoDataFrame, bd_type: str = 'building') -> gpd.GeoDataFrame:
     """屋顶(基底)面积计算
 
     Args:
@@ -65,23 +72,24 @@ def aoi_roof_area(aois: gpd.GeoDataFrame, block: gpd.GeoDataFrame, aoi_type: str
     Returns:
         gpd.GeoDataFrame: blocks新增一列
     """
-    try:
-        target_aoi = eval(FILTER_MAP[aoi_type])
-    except KeyError:
-        raise Exception(' INVALID AOI TYPE ')
-    if not '屋顶面积' in aoi_type:
-        aoi_type += '屋顶面积'
-    if '绿地' in aoi_type:
-        aoi_type = '绿地面积'
-    overlap = gpd.overlay(block, target_aoi[['geometry']])[['id', 'geometry']]
-    overlap[aoi_type] = overlap.area
-    overlap = overlap.groupby(['id']).sum()[[aoi_type]]
-    res = pd.merge(block, overlap, how='outer', left_on='id', right_index=True)
-    res[aoi_type] = res[aoi_type].fillna(0).astype(float).round(2)
+    ori_crs = block.crs
+    to_mercator(bd)
+    to_mercator(block)
+    cols = block.columns.to_list()
+    block['join_id'] = block.index
+
+    overlap = gpd.overlay(block, bd[['geometry']])[['join_id', 'geometry']]
+    overlap[f'{bd_type}_roof_area'] = overlap.area
+    overlap = overlap.groupby(['join_id']).sum()[[f'{bd_type}_roof_area']]
+    res = pd.merge(block, overlap, how='outer',
+                   left_on='join_id', right_index=True)
+    res[f'{bd_type}_roof_area'] = res[f'{bd_type}_roof_area'].fillna(
+        0).astype(float).round(2)
+    res = res.to_crs(ori_crs)[cols+[f'{bd_type}_roof_area']]
     return res
 
 
-def aoi_floor_area(aois: gpd.GeoDataFrame, block: gpd.GeoDataFrame, aoi_type: str) -> gpd.GeoDataFrame:
+def building_floor_area_cal(bd: gpd.GeoDataFrame, block: gpd.GeoDataFrame, bd_type: str = 'building', height_field='height', height_per_floor=3) -> gpd.GeoDataFrame:
     """建筑面积计算
 
     Args:
@@ -95,16 +103,21 @@ def aoi_floor_area(aois: gpd.GeoDataFrame, block: gpd.GeoDataFrame, aoi_type: st
     Returns:
         gpd.GeoDataFrame: blocks新增一列
     """
-    try:
-        target_aoi = eval(FILTER_MAP[aoi_type])
-    except KeyError:
-        raise Exception(' INVALID AOI TYPE ')
-    target_aoi['floor'] = (target_aoi['height'] // 3).astype(int)
-    overlap = gpd.overlay(block, target_aoi[['floor', 'geometry']])
-    overlap['面积'] = overlap.area
-    overlap[aoi_type+'面积'] = overlap['floor'] * overlap['面积']
-    overlap = overlap.groupby('id').sum()[[aoi_type+'面积']]
-    res = pd.merge(block, overlap, how='outer', left_on='id', right_index=True)
-    res[aoi_type + '面积'] = res[aoi_type +
-                               '面积'].fillna(0).astype(float).round(2)
+    ori_crs = block.crs
+    to_mercator(bd)
+    to_mercator(block)
+    cols = block.columns.to_list()
+    block['join_id'] = block.index
+
+    bd['floor'] = (bd[height_field] // height_per_floor).astype(int)
+    overlap = gpd.overlay(block, bd[['floor', 'geometry']])
+    overlap['roof_area'] = overlap.area
+    overlap[bd_type+'_floor_area'] = overlap['floor'] * overlap['roof_area']
+    overlap = overlap.groupby('join_id').sum()[[bd_type+'_floor_area']]
+    res = pd.merge(block, overlap, how='outer',
+                   left_on='join_id', right_index=True)
+    res[bd_type+'_floor_area'] = res[bd_type +
+                                     '_floor_area'].fillna(0).astype(float).round(2)
+    res = res.to_crs(ori_crs)[cols + bd_type +
+                              '_floor_area']
     return res

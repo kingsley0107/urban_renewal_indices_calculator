@@ -71,10 +71,10 @@ def count_poi_with_buffer(pois: gpd.GeoDataFrame, block: gpd.GeoDataFrame,  thre
     """计算block内的poi数量(buffer版poi)
 
     Args:
-        pois (gpd.GeoDataFrame): _description_
-        block (gpd.GeoDataFrame): _description_
-        poi_type (str): _description_
-        threshold (int, optional): _description_. Defaults to 300.
+        pois (gpd.GeoDataFrame): Points of interest data.
+        block (gpd.GeoDataFrame): Block data.
+        poi_type (str, optional): Type of POI. Defaults to ''.
+        buffer_distance (int, optional): Buffer distance around POI in meters. Defaults to 300.
 
     Raises:
         Exception: _description_
